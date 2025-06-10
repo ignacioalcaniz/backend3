@@ -8,7 +8,7 @@ const router = Router();
 
 
 router.get('/mockingpets', (req, res) => {
-  // Lógica original aquí
+  
   res.send('Este es el endpoint de mockingpets movido al nuevo router');
 });
 

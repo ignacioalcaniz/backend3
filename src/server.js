@@ -9,4 +9,4 @@ app.use('/api/mocks', mocksRouter);
 
 await mongoose.connect('mongodb://localhost:27017/backend3');
 
-app.listen(3000, () => console.log('Servidor escuchando en puerto 3000'));
+app.listen(3500, () => console.log('Servidor escuchando en puerto 3500'));

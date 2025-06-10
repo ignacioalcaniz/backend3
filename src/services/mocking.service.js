@@ -1,4 +1,3 @@
-
 import bcrypt from 'bcrypt';
 
 export function generateMockUsers(count = 1) {

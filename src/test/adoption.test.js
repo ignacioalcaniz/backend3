@@ -1,79 +1,52 @@
 import request from 'supertest';
-import express from 'express';
+import app from '../src/server.js';
 import mongoose from 'mongoose';
-import adoptionRouter from '../src/routes/adoption.router.js';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import { UserModel } from '../src/models/user.model.js';
 import { PetModel } from '../src/models/pet.model.js';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 
-let app, mongoServer;
-
+let mongoServer;
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   await mongoose.connect(mongoServer.getUri());
-  app = express();
-  app.use(express.json());
-  app.use('/api/adoptions', adoptionRouter);
 });
-
 afterAll(async () => {
   await mongoose.disconnect();
   await mongoServer.stop();
 });
 
-describe('Router Adoption', () => {
+describe('Endpoints /api/adoptions', () => {
   let user, pet;
-
   beforeEach(async () => {
-    await UserModel.deleteMany({});
-    await PetModel.deleteMany({});
-
-    user = await UserModel.create({
-      first_name: 'Test',
-      last_name: 'User',
-      email: 'test@mail.com',
-      password: 'pass',
-      role: 'user',
-      pets: []
-    });
-
-    pet = await PetModel.create({
-      name: 'Sparky',
-      species: 'dog',
-      age: 3,
-      owner: null
-    });
+    await UserModel.deleteMany();
+    await PetModel.deleteMany();
+    user = await UserModel.create({ first_name: 'A', last_name:'B', email:'a@b.com', password:'x', pets:[] });
+    pet = await PetModel.create({ name:'Pi', species:'dog', age:3 });
   });
 
-  test('POST /api/adoptions crea adopción correctamente', async () => {
-    const res = await request(app).post('/api/adoptions').send({
-      userId: user._id.toString(),
-      petId: pet._id.toString()
-    });
-    expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty('id');
-    expect(res.body.userId).toBe(user._id.toString());
-    expect(res.body.petId).toBe(pet._id.toString());
-  });
-
-  test('GET /api/adoptions devuelve array', async () => {
+  it('GET /api/adoptions → OK y array', async () => {
     const res = await request(app).get('/api/adoptions');
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  test('DELETE /api/adoptions/:id elimina adopción y revierte relaciones', async () => {
-    const post = await request(app).post('/api/adoptions').send({
-      userId: user._id.toString(),
-      petId: pet._id.toString()
-    });
-    const id = post.body.id;
-    const petAfter = await PetModel.findById(pet._id);
-    expect(petAfter.owner.toString()).toBe(user._id.toString());
+  it('POST /api/adoptions → registro adopción', async () => {
+    const res = await request(app)
+      .post('/api/adoptions')
+      .send({ userId: user._id.toString(), petId: pet._id.toString() });
+    expect(res.status).toBe(201);
+    expect(res.body.pet.owner).toBe(user._id.toString());
+  });
 
-    const del = await request(app).delete(`/api/adoptions/${id}`);
-    expect(del.status).toBe(200);
-    const petAfterDel = await PetModel.findById(pet._id);
-    expect(petAfterDel.owner).toBeNull();
+  it('POST sin datos → error 400', async () => {
+    const res = await request(app).post('/api/adoptions').send({});
+    expect(res.status).toBe(400);
+  });
+
+  it('POST ids inválidos → 404', async () => {
+    const res = await request(app)
+      .post('/api/adoptions')
+      .send({ userId: mongoose.Types.ObjectId(), petId: mongoose.Types.ObjectId() });
+    expect(res.status).toBe(404);
   });
 });

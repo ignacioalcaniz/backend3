@@ -1,11 +1,26 @@
-## 🐳 Docker
+# Proyecto Adoption API
 
-La imagen del proyecto está disponible en Docker Hub:
+API para la gestión de adopciones de mascotas, desarrollada con Node.js y Express.
 
-👉 [https://hub.docker.com/r/ignacioalcaniz/proyecto](https://hub.docker.com/r/ignacioalcaniz/proyecto)
+---
 
-### Ejecutar con Docker:
+## 📋 Descripción
 
-```bash
-docker pull ignacioalcaniz/proyecto
-docker run -p 3500:3500 ignacioalcaniz/proyecto
+Esta aplicación permite manejar usuarios, adopciones y otros recursos relacionados con el proceso de adopción de mascotas. Incluye documentación Swagger para el módulo de Users y tests funcionales para el router `adoption.router.js`.
+
+---
+
+## 🚀 Tecnologías usadas
+
+- Node.js  
+- Express  
+- MongoDB  
+- Docker  
+- Jest / Supertest (para tests funcionales)  
+- Swagger (para documentación API)
+
+---
+
+## 📁 Estructura del proyecto
+
+
